@@ -1,0 +1,25 @@
+Spice Counter — run on YOUR computer (local)
+
+This app is not a cloud website. The cashier PC holds the files and the data.
+
+1. In this Cursor project, click "Create repo" so you get a Git repository you can clone.
+
+2. On the restaurant / office Windows PC, open Command Prompt:
+
+   git clone <YOUR-REPO-URL>
+   cd spice-counter-pos
+   npm install
+   npm run desktop
+
+   Or after clone, double-click:  Start Spice Counter.bat
+
+3. A window named "Spice Counter POS" opens on that PC.
+   Menu and bills stay on that PC:
+   - Without SQL Server:  data\pos-store.json
+   - With SQL Server:     your local SQL Server (see .env.example)
+
+Do not open 127.0.0.1 in Chrome on another computer.
+Do not use the cloud agent Preview as the shop till.
+
+Need SQL Server on the same PC? Install SQL Server Express locally, create
+database RestaurantPos, copy .env.example to .env, fill in host/user/password.

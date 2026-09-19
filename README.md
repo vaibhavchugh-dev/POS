@@ -1,26 +1,28 @@
 # Spice Counter POS (desktop)
 
-Windows restaurant counter app: tap menu items, build a ticket, generate a numbered bill. React + TypeScript UI in a desktop window (Electron). Data goes to **SQL Server** on the same PC or LAN, or to a local file if SQL Server is not set up yet.
+Local restaurant till for **your PC**. Not a cloud app.
 
-This is **not** a cloud product. Install it on the counter PC and run `Start Spice Counter.bat` (Windows) or `npm run desktop`.
+## Put it on your computer
 
-## Run on the restaurant PC
+1. Install [Node.js 20 LTS](https://nodejs.org/).
+2. Click **Create repo** in this Cursor project (if you do not have a Git URL yet).
+3. On **your** Windows PC:
 
-1. Install [Node.js 20+](https://nodejs.org/) (LTS).
-2. Copy this folder onto the PC.
-3. Double-click **Start Spice Counter.bat**  
-   or in a terminal:
-
-```bash
+```bat
+git clone <YOUR-REPO-URL>
+cd spice-counter-pos
 npm install
 npm run desktop
 ```
 
-A desktop window titled **Spice Counter POS** opens. The server only listens on `127.0.0.1` (this machine). Staff do not use a browser or a cloud URL.
+Or copy the project folder onto the PC and double-click **Start Spice Counter.bat**.
 
-First run can take a minute while packages install. Later launches are faster. Optional: `npm run build` once, then `npm run desktop` uses the production server.
+A window **Spice Counter POS** opens on that machine. Bills are saved locally (`data\pos-store.json`) until you point `.env` at **local SQL Server**.
 
-## SQL Server (recommended)
+See `LOCAL-SETUP.txt` for the short version.
+
+## SQL Server (same PC or shop LAN)
+
 
 On the same PC or a shop server, create database `RestaurantPos`. Copy `.env.example` to `.env` and set:
 
