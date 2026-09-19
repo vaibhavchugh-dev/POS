@@ -15,7 +15,7 @@ npm install
 npm run desktop
 ```
 
-Or copy the project folder onto the PC and double-click **Start Spice Counter.bat**.
+Or copy the project folder onto the PC and double-click **Start Jain Dosa House.bat**.
 
 A window **Jain Dosa House POS** opens on that machine. Bills are saved locally (`data\pos-store.json`) until you point `.env` at **local SQL Server**.
 

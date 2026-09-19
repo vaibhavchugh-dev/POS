@@ -11,7 +11,7 @@ On the restaurant / office Windows PC, after Node.js is installed:
    npm install
    npm run desktop
 
-Or after clone, double-click:  Start Spice Counter.bat
+Or after clone, double-click:  Start Jain Dosa House.bat
 
 A window named "Jain Dosa House POS" opens on that PC.
 Menu and bills stay on that PC:
