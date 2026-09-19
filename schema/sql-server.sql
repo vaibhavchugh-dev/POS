@@ -29,7 +29,9 @@ CREATE TABLE dbo.Bills (
   Subtotal DECIMAL(10,2) NOT NULL,
   TaxRate DECIMAL(6,4) NOT NULL,
   TaxAmount DECIMAL(10,2) NOT NULL,
-  Total DECIMAL(10,2) NOT NULL
+  Total DECIMAL(10,2) NOT NULL,
+  PaymentMode NVARCHAR(12) NOT NULL DEFAULT 'cash',
+  GuestPhone NVARCHAR(20) NOT NULL DEFAULT ''
 );
 
 CREATE TABLE dbo.BillLines (

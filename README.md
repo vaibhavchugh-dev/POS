@@ -33,7 +33,7 @@ SQL_SERVER_USER=sa
 SQL_SERVER_PASSWORD=your-password
 SQL_SERVER_ENCRYPT=true
 SQL_SERVER_TRUST_CERT=true
-TAX_RATE=0.1
+TAX_RATE=0.05
 ```
 
 Or set `SQL_SERVER_CONNECTION_STRING`. On first connect the app creates tables and seeds a sample menu. You can also run `schema/sql-server.sql` yourself.
@@ -42,11 +42,10 @@ With no SQL Server settings, menu and bills are stored in `data/pos-store.json` 
 
 ## Counter features
 
-- Menu by category; add items from Menu items
-- Ticket quantities, 10% tax, table/guest name
-- Sequential bills (`BILL-0001`, …)
-- Printable receipt page
-- Bill history
+- Menu by category; add items from Menu
+- Ticket with Cash or UPI, GST 5%, sequential bills
+- Today's sales dashboard (cash vs UPI)
+- Print receipt or send bill / day total on WhatsApp
 
 ## Developer notes
 

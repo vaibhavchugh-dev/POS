@@ -8,7 +8,9 @@ import {
   type TicketState,
 } from "@/app/actions";
 import { RESTAURANT_NAME } from "@/lib/brand";
+import { paymentLabel } from "@/lib/sales";
 import { formatBillNumber, formatMoney } from "@/lib/seed";
+import { billWhatsAppText, whatsappHref } from "@/lib/whatsapp";
 import type { Bill, Category, MenuItem } from "@/lib/types";
 import type { ReactNode } from "react";
 
@@ -72,8 +74,11 @@ export function PosCounter({
           <a className="inline-flex h-9 items-center rounded-full border border-[#c9a36a] px-3.5 text-sm font-medium text-[#f8ead3] hover:bg-white/10" href="/?dialog=menu">
             Menu
           </a>
+          <a className="inline-flex h-9 items-center rounded-full border border-[#c9a36a] px-3.5 text-sm font-medium text-[#f8ead3] hover:bg-white/10" href="/dashboard">
+            Today&apos;s sales
+          </a>
           <a className="inline-flex h-9 items-center rounded-full bg-[#e8b86a] px-3.5 text-sm font-semibold text-[#3f2414]" href="/?dialog=bills">
-            Today&apos;s bills
+            Bills
           </a>
         </div>
       </header>
@@ -196,17 +201,33 @@ export function PosCounter({
               <span>{formatMoney(total)}</span>
             </div>
           </div>
-          <div className="mt-4 flex gap-2">
-            <form action={clearTicketAction} className="flex-1">
+          <div className="mt-4 space-y-2">
+            <form action={clearTicketAction}>
               <button
-                className={`${chipOff} h-11 w-full rounded-xl`}
+                className={`${chipOff} h-10 w-full rounded-xl`}
                 type="submit"
                 disabled={!ticket.lines.length}
               >
-                Clear
+                Clear ticket
               </button>
             </form>
-            <form action={generateBillAction} className="flex-[1.4]">
+            <form action={generateBillAction} className="space-y-2">
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <label className="flex items-center gap-2 rounded-xl border border-[#ead9b8] bg-white px-3 py-2">
+                  <input type="radio" name="paymentMode" value="cash" defaultChecked />
+                  Cash
+                </label>
+                <label className="flex items-center gap-2 rounded-xl border border-[#ead9b8] bg-white px-3 py-2">
+                  <input type="radio" name="paymentMode" value="upi" />
+                  UPI
+                </label>
+              </div>
+              <input
+                name="guestPhone"
+                inputMode="numeric"
+                placeholder="WhatsApp mobile (optional)"
+                className="h-10 w-full rounded-xl border border-[#e2d3b8] bg-white px-3 text-sm"
+              />
               <button
                 className="h-11 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50"
                 type="submit"
@@ -222,7 +243,8 @@ export function PosCounter({
       {dialog === "receipt" && receipt ? (
         <Overlay title={formatBillNumber(receipt.billNumber)}>
           <p className="text-sm text-[#7a5a3a]">
-            {receipt.tableLabel} · {new Date(receipt.createdAt).toLocaleString("en-IN")}
+            {receipt.tableLabel} · {paymentLabel(receipt.paymentMode)} ·{" "}
+            {new Date(receipt.createdAt).toLocaleString("en-IN")}
           </p>
           {receipt.lines.map((line) => (
             <div key={line.menuItemId} className="flex justify-between text-sm">
@@ -237,9 +259,19 @@ export function PosCounter({
             <span>Total</span>
             <span>{formatMoney(receipt.total)}</span>
           </div>
-          <a className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground" href={`/receipt/${receipt.id}`} target="_blank" rel="noreferrer">
-            Print receipt
-          </a>
+          <div className="flex flex-wrap gap-2">
+            <a className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground" href={`/receipt/${receipt.id}`} target="_blank" rel="noreferrer">
+              Print receipt
+            </a>
+            <a
+              className="inline-flex h-10 items-center justify-center rounded-xl bg-[#128C7E] px-4 text-sm font-semibold text-white"
+              href={whatsappHref(billWhatsAppText(receipt), receipt.guestPhone)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              WhatsApp bill
+            </a>
+          </div>
         </Overlay>
       ) : null}
 
@@ -256,11 +288,22 @@ export function PosCounter({
                     <span className="font-semibold text-primary">{formatMoney(bill.total)}</span>
                   </div>
                   <p className="text-[#7a5a3a]">
-                    {bill.tableLabel} · {new Date(bill.createdAt).toLocaleString("en-IN")}
+                    {bill.tableLabel} · {paymentLabel(bill.paymentMode)} ·{" "}
+                    {new Date(bill.createdAt).toLocaleString("en-IN")}
                   </p>
-                  <a className={`${chipOff} mt-2`} href={`/receipt/${bill.id}`} target="_blank" rel="noreferrer">
-                    Print
-                  </a>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <a className={chipOff} href={`/receipt/${bill.id}`} target="_blank" rel="noreferrer">
+                      Print
+                    </a>
+                    <a
+                      className={`${chipOff} border-[#128C7E] text-[#128C7E]`}
+                      href={whatsappHref(billWhatsAppText(bill), bill.guestPhone)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      WhatsApp
+                    </a>
+                  </div>
                 </li>
               ))}
             </ul>

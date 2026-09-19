@@ -20,6 +20,8 @@ export type BillLine = {
   lineTotal: number;
 };
 
+export type PaymentMode = "cash" | "upi";
+
 export type Bill = {
   id: string;
   billNumber: number;
@@ -29,6 +31,8 @@ export type Bill = {
   taxRate: number;
   taxAmount: number;
   total: number;
+  paymentMode: PaymentMode;
+  guestPhone: string;
   lines: BillLine[];
 };
 

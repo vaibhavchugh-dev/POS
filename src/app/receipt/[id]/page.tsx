@@ -19,7 +19,7 @@ export default async function ReceiptPage({
     <main className="mx-auto max-w-sm p-6 font-mono text-sm">
       <h1 className="text-lg font-bold">{RESTAURANT_NAME}</h1>
       <p>{formatBillNumber(bill.billNumber)}</p>
-      <p>{bill.tableLabel}</p>
+      <p>{bill.tableLabel} · {bill.paymentMode === "upi" ? "UPI" : "Cash"}</p>
       <p>{new Date(bill.createdAt).toLocaleString("en-IN")}</p>
       <hr className="my-3 border-dashed" />
       {bill.lines.map((line) => (

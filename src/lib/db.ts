@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import sql from "mssql";
 import { seedStore } from "./seed";
-import type { Bill, BillLine, Category, MenuItem, PosStore } from "./types";
+import type { Bill, BillLine, Category, MenuItem, PaymentMode, PosStore } from "./types";
 
 const DATA_PATH = path.join(process.cwd(), "data", "pos-store.json");
 
@@ -60,7 +60,9 @@ async function ensureSqlSchema(pool: sql.ConnectionPool) {
         Subtotal DECIMAL(10,2) NOT NULL,
         TaxRate DECIMAL(6,4) NOT NULL,
         TaxAmount DECIMAL(10,2) NOT NULL,
-        Total DECIMAL(10,2) NOT NULL
+        Total DECIMAL(10,2) NOT NULL,
+        PaymentMode NVARCHAR(12) NOT NULL DEFAULT 'cash',
+        GuestPhone NVARCHAR(20) NOT NULL DEFAULT ''
       );
 
     IF OBJECT_ID('dbo.BillLines', 'U') IS NULL
@@ -83,6 +85,12 @@ async function ensureSqlSchema(pool: sql.ConnectionPool) {
 
     IF NOT EXISTS (SELECT 1 FROM dbo.Counters WHERE Name = 'BillNumber')
       INSERT INTO dbo.Counters (Name, NextValue) VALUES ('BillNumber', 1);
+
+    IF COL_LENGTH('dbo.Bills', 'PaymentMode') IS NULL
+      ALTER TABLE dbo.Bills ADD PaymentMode NVARCHAR(12) NOT NULL CONSTRAINT DF_Bills_PaymentMode DEFAULT 'cash';
+
+    IF COL_LENGTH('dbo.Bills', 'GuestPhone') IS NULL
+      ALTER TABLE dbo.Bills ADD GuestPhone NVARCHAR(20) NOT NULL CONSTRAINT DF_Bills_GuestPhone DEFAULT '';
   `);
 
   const count = await pool.request().query("SELECT COUNT(*) AS c FROM dbo.Categories");
@@ -253,16 +261,26 @@ export async function listBills(): Promise<Bill[]> {
       taxRate: Number(r.TaxRate),
       taxAmount: Number(r.TaxAmount),
       total: Number(r.Total),
+      paymentMode: (r.PaymentMode === "upi" ? "upi" : "cash") as PaymentMode,
+      guestPhone: String(r.GuestPhone ?? ""),
       lines: byBill.get(r.Id) ?? [],
     }));
   }
 
   const store = await readJson();
-  return [...store.bills].sort((a, b) => b.billNumber - a.billNumber);
+  return [...store.bills]
+    .map((bill) => ({
+      ...bill,
+      paymentMode: (bill.paymentMode === "upi" ? "upi" : "cash") as PaymentMode,
+      guestPhone: bill.guestPhone ?? "",
+    }))
+    .sort((a, b) => b.billNumber - a.billNumber);
 }
 
 export async function createBill(input: {
   tableLabel: string;
+  paymentMode?: PaymentMode;
+  guestPhone?: string;
   lines: { menuItemId: string; quantity: number }[];
 }): Promise<Bill> {
   if (!input.lines.length) {
@@ -299,6 +317,8 @@ export async function createBill(input: {
     );
     const taxAmount = Number((subtotal * taxRate).toFixed(2));
     const total = Number((subtotal + taxAmount).toFixed(2));
+    const paymentMode: PaymentMode = input.paymentMode === "upi" ? "upi" : "cash";
+    const guestPhone = String(input.guestPhone ?? "").trim();
 
     const tx = new sql.Transaction(pool);
     await tx.begin();
@@ -322,9 +342,11 @@ export async function createBill(input: {
         .input("taxRate", sql.Decimal(6, 4), taxRate)
         .input("taxAmt", sql.Decimal(10, 2), taxAmount)
         .input("total", sql.Decimal(10, 2), total)
+        .input("pay", sql.NVarChar, paymentMode)
+        .input("phone", sql.NVarChar, guestPhone)
         .query(`
-          INSERT INTO dbo.Bills (Id, BillNumber, TableLabel, CreatedAt, Subtotal, TaxRate, TaxAmount, Total)
-          VALUES (@id, @num, @table, @created, @sub, @taxRate, @taxAmt, @total)
+          INSERT INTO dbo.Bills (Id, BillNumber, TableLabel, CreatedAt, Subtotal, TaxRate, TaxAmount, Total, PaymentMode, GuestPhone)
+          VALUES (@id, @num, @table, @created, @sub, @taxRate, @taxAmt, @total, @pay, @phone)
         `);
 
       for (const line of billLines) {
@@ -351,6 +373,8 @@ export async function createBill(input: {
         taxRate,
         taxAmount,
         total,
+        paymentMode,
+        guestPhone,
         lines: billLines,
       };
     } catch (error) {
@@ -378,6 +402,8 @@ export async function createBill(input: {
   );
   const taxAmount = Number((subtotal * store.taxRate).toFixed(2));
   const total = Number((subtotal + taxAmount).toFixed(2));
+  const paymentMode: PaymentMode = input.paymentMode === "upi" ? "upi" : "cash";
+  const guestPhone = String(input.guestPhone ?? "").trim();
   const bill: Bill = {
     id: `bill-${store.nextBillNumber}`,
     billNumber: store.nextBillNumber,
@@ -387,6 +413,8 @@ export async function createBill(input: {
     taxRate: store.taxRate,
     taxAmount,
     total,
+    paymentMode,
+    guestPhone,
     lines: billLines,
   };
   store.bills.push(bill);

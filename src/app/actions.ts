@@ -76,14 +76,18 @@ export async function clearTicketAction() {
   revalidatePath("/");
 }
 
-export async function generateBillAction() {
+export async function generateBillAction(formData: FormData) {
   const ticket = await readTicket();
   if (!ticket.lines.length) {
     revalidatePath("/");
     return;
   }
+  const paymentMode = String(formData.get("paymentMode") ?? "cash") === "upi" ? "upi" : "cash";
+  const guestPhone = String(formData.get("guestPhone") ?? "");
   const bill = await createBill({
     tableLabel: ticket.tableLabel,
+    paymentMode,
+    guestPhone,
     lines: ticket.lines.map((line) => ({
       menuItemId: line.menuItemId,
       quantity: line.quantity,
