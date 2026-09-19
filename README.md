@@ -1,21 +1,28 @@
-# Spice Counter POS
+# Spice Counter POS (desktop)
 
-Restaurant counter POS: tap menu items onto a ticket, then generate a numbered bill.
+Windows restaurant counter app: tap menu items, build a ticket, generate a numbered bill. React + TypeScript UI in a desktop window (Electron). Data goes to **SQL Server** on the same PC or LAN, or to a local file if SQL Server is not set up yet.
 
-## Run locally
+This is **not** a cloud product. Install it on the counter PC and run `Start Spice Counter.bat` (Windows) or `npm run desktop`.
+
+## Run on the restaurant PC
+
+1. Install [Node.js 20+](https://nodejs.org/) (LTS).
+2. Copy this folder onto the PC.
+3. Double-click **Start Spice Counter.bat**  
+   or in a terminal:
 
 ```bash
 npm install
-npm run dev -- --port 43123
+npm run desktop
 ```
 
-Open [http://localhost:43123](http://localhost:43123).
+A desktop window titled **Spice Counter POS** opens. The server only listens on `127.0.0.1` (this machine). Staff do not use a browser or a cloud URL.
 
-Without SQL Server, the app stores menu and bills in `data/pos-store.json` so you can try it immediately.
+First run can take a minute while packages install. Later launches are faster. Optional: `npm run build` once, then `npm run desktop` uses the production server.
 
-## SQL Server
+## SQL Server (recommended)
 
-Create a database (for example `RestaurantPos`) and set:
+On the same PC or a shop server, create database `RestaurantPos`. Copy `.env.example` to `.env` and set:
 
 ```
 SQL_SERVER_HOST=localhost
@@ -28,18 +35,18 @@ SQL_SERVER_TRUST_CERT=true
 TAX_RATE=0.1
 ```
 
-You can also set `SQL_SERVER_CONNECTION_STRING` instead of the host/user fields.
+Or set `SQL_SERVER_CONNECTION_STRING`. On first connect the app creates tables and seeds a sample menu. You can also run `schema/sql-server.sql` yourself.
 
-On first connect the app creates `Categories`, `MenuItems`, `Bills`, `BillLines`, and `Counters`, then seeds a sample Indian restaurant menu.
+With no SQL Server settings, menu and bills are stored in `data/pos-store.json` on disk.
 
-`schema/sql-server.sql` is the same schema for manual setup if you prefer.
+## Counter features
 
-## What it does
-
-- Menu by category with add/edit
-- Ticket with quantities, 10% tax, table/guest label
-- Sequential bill numbers (`BILL-0001`, …) stored in SQL Server or the local file
-- Printable receipt after a bill is generated
+- Menu by category; add items from Menu items
+- Ticket quantities, 10% tax, table/guest name
+- Sequential bills (`BILL-0001`, …)
+- Printable receipt page
 - Bill history
 
-This is a full-screen web POS (React + TypeScript). Run it in a browser on a counter PC, or wrap it later with Electron if you need a native window.
+## Developer notes
+
+`npm run dev` still starts the UI server only (for coding). `npm run desktop` is what the cashier should use.
