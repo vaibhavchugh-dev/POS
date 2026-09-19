@@ -31,10 +31,10 @@ type MenuResponse = {
   backend: string;
 };
 
-export function PosApp() {
-  const [menu, setMenu] = useState<MenuResponse | null>(null);
+export function PosApp({ initialMenu }: { initialMenu: MenuResponse }) {
+  const [menu, setMenu] = useState<MenuResponse | null>(initialMenu);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [categoryId, setCategoryId] = useState("all");
   const [ticket, setTicket] = useState<TicketLine[]>([]);
   const [tableLabel, setTableLabel] = useState("");
@@ -47,7 +47,7 @@ export function PosApp() {
   const [itemForm, setItemForm] = useState({
     id: "",
     name: "",
-    categoryId: "",
+    categoryId: initialMenu.categories[0]?.id ?? "",
     price: "",
     available: true,
   });
