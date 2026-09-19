@@ -1,6 +1,6 @@
-# Spice Counter POS (desktop)
+# Jain Dosa House POS (desktop)
 
-Local restaurant till for **your PC**. Not a cloud app.
+Local till for **Jain Dosa House**. Not a cloud app.
 
 ## Put it on your computer
 
@@ -17,7 +17,7 @@ npm run desktop
 
 Or copy the project folder onto the PC and double-click **Start Spice Counter.bat**.
 
-A window **Spice Counter POS** opens on that machine. Bills are saved locally (`data\pos-store.json`) until you point `.env` at **local SQL Server**.
+A window **Jain Dosa House POS** opens on that machine. Bills are saved locally (`data\pos-store.json`) until you point `.env` at **local SQL Server**.
 
 See `LOCAL-SETUP.txt` for the short version.
 

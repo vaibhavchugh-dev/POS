@@ -1,3 +1,4 @@
+import { RESTAURANT_NAME } from "@/lib/brand";
 import { listBills } from "@/lib/db";
 import { formatBillNumber, formatMoney } from "@/lib/seed";
 import { notFound } from "next/navigation";
@@ -16,7 +17,7 @@ export default async function ReceiptPage({
 
   return (
     <main className="mx-auto max-w-sm p-6 font-mono text-sm">
-      <h1 className="text-lg font-bold">Spice Counter</h1>
+      <h1 className="text-lg font-bold">{RESTAURANT_NAME}</h1>
       <p>{formatBillNumber(bill.billNumber)}</p>
       <p>{bill.tableLabel}</p>
       <p>{new Date(bill.createdAt).toLocaleString()}</p>

@@ -1,4 +1,4 @@
-Spice Counter — run on YOUR computer (local)
+Jain Dosa House — run on YOUR computer (local)
 
 This app is not a cloud website. The cashier PC holds the files and the data.
 
@@ -13,7 +13,7 @@ On the restaurant / office Windows PC, after Node.js is installed:
 
 Or after clone, double-click:  Start Spice Counter.bat
 
-A window named "Spice Counter POS" opens on that PC.
+A window named "Jain Dosa House POS" opens on that PC.
 Menu and bills stay on that PC:
 - Without SQL Server:  data\pos-store.json
 - With SQL Server:     your local SQL Server (see .env.example)

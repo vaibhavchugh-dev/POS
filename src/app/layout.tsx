@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { RESTAURANT_NAME, RESTAURANT_POS_TITLE } from "@/lib/brand";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Spice Counter POS",
-  description: "Restaurant point of sale with menu items and sequential bills.",
+  title: RESTAURANT_POS_TITLE,
+  description: `${RESTAURANT_NAME} point of sale — menu items and sequential bills.`,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

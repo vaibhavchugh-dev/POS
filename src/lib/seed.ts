@@ -2,31 +2,31 @@ import type { PosStore } from "./types";
 
 export function seedStore(): PosStore {
   const categories = [
-    { id: "cat-starters", name: "Starters", sortOrder: 1 },
-    { id: "cat-mains", name: "Mains", sortOrder: 2 },
-    { id: "cat-breads", name: "Breads & Rice", sortOrder: 3 },
+    { id: "cat-dosa", name: "Dosa", sortOrder: 1 },
+    { id: "cat-idli", name: "Idli & Vada", sortOrder: 2 },
+    { id: "cat-rice", name: "Rice", sortOrder: 3 },
     { id: "cat-drinks", name: "Drinks", sortOrder: 4 },
-    { id: "cat-desserts", name: "Desserts", sortOrder: 5 },
+    { id: "cat-sides", name: "Sides", sortOrder: 5 },
   ];
 
   const menuItems = [
-    { id: "mi-1", name: "Vegetable Samosa (2 pcs)", categoryId: "cat-starters", price: 4.5, available: true },
-    { id: "mi-2", name: "Chicken Tikka", categoryId: "cat-starters", price: 8.95, available: true },
-    { id: "mi-3", name: "Paneer Pakora", categoryId: "cat-starters", price: 7.5, available: true },
-    { id: "mi-4", name: "Butter Chicken", categoryId: "cat-mains", price: 16.95, available: true },
-    { id: "mi-5", name: "Lamb Rogan Josh", categoryId: "cat-mains", price: 18.5, available: true },
-    { id: "mi-6", name: "Palak Paneer", categoryId: "cat-mains", price: 14.95, available: true },
-    { id: "mi-7", name: "Chana Masala", categoryId: "cat-mains", price: 13.5, available: true },
-    { id: "mi-8", name: "Fish Curry", categoryId: "cat-mains", price: 17.95, available: true },
-    { id: "mi-9", name: "Garlic Naan", categoryId: "cat-breads", price: 3.75, available: true },
-    { id: "mi-10", name: "Butter Naan", categoryId: "cat-breads", price: 3.25, available: true },
-    { id: "mi-11", name: "Jeera Rice", categoryId: "cat-breads", price: 4.5, available: true },
-    { id: "mi-12", name: "Biryani Rice", categoryId: "cat-breads", price: 6.95, available: true },
-    { id: "mi-13", name: "Mango Lassi", categoryId: "cat-drinks", price: 4.25, available: true },
-    { id: "mi-14", name: "Masala Chai", categoryId: "cat-drinks", price: 2.95, available: true },
-    { id: "mi-15", name: "Sparkling Water", categoryId: "cat-drinks", price: 2.5, available: true },
-    { id: "mi-16", name: "Gulab Jamun (2 pcs)", categoryId: "cat-desserts", price: 5.5, available: true },
-    { id: "mi-17", name: "Kheer", categoryId: "cat-desserts", price: 5.95, available: true },
+    { id: "mi-1", name: "Plain Dosa (Jain)", categoryId: "cat-dosa", price: 6.5, available: true },
+    { id: "mi-2", name: "Masala Dosa (Jain)", categoryId: "cat-dosa", price: 8.95, available: true },
+    { id: "mi-3", name: "Mysore Masala Dosa (Jain)", categoryId: "cat-dosa", price: 9.5, available: true },
+    { id: "mi-4", name: "Set Dosa (2 pcs, Jain)", categoryId: "cat-dosa", price: 7.95, available: true },
+    { id: "mi-5", name: "Rava Dosa (Jain)", categoryId: "cat-dosa", price: 9.25, available: true },
+    { id: "mi-6", name: "Paper Dosa", categoryId: "cat-dosa", price: 8.5, available: true },
+    { id: "mi-7", name: "Idli (2 pcs)", categoryId: "cat-idli", price: 5.5, available: true },
+    { id: "mi-8", name: "Rava Idli (2 pcs)", categoryId: "cat-idli", price: 6.25, available: true },
+    { id: "mi-9", name: "Medu Vada (2 pcs)", categoryId: "cat-idli", price: 6.5, available: true },
+    { id: "mi-10", name: "Idli Vada Combo", categoryId: "cat-idli", price: 7.95, available: true },
+    { id: "mi-11", name: "Sambar Rice (Jain)", categoryId: "cat-rice", price: 8.5, available: true },
+    { id: "mi-12", name: "Curd Rice (Jain)", categoryId: "cat-rice", price: 7.5, available: true },
+    { id: "mi-13", name: "Filter Coffee", categoryId: "cat-drinks", price: 2.95, available: true },
+    { id: "mi-14", name: "Masala Chaas", categoryId: "cat-drinks", price: 3.25, available: true },
+    { id: "mi-15", name: "Fresh Lime Soda", categoryId: "cat-drinks", price: 3.5, available: true },
+    { id: "mi-16", name: "Coconut Chutney", categoryId: "cat-sides", price: 1.5, available: true },
+    { id: "mi-17", name: "Sambar Cup", categoryId: "cat-sides", price: 2.25, available: true },
   ];
 
   return {

@@ -7,6 +7,7 @@ import {
   setTableAction,
   type TicketState,
 } from "@/app/actions";
+import { RESTAURANT_NAME } from "@/lib/brand";
 import { formatBillNumber, formatMoney } from "@/lib/seed";
 import type { Bill, Category, MenuItem } from "@/lib/types";
 import type { ReactNode } from "react";
@@ -54,7 +55,7 @@ export function PosCounter({
       <header className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
         <div>
           <h1 className="font-heading text-xl font-semibold tracking-tight">
-            Spice Counter
+            {RESTAURANT_NAME}
           </h1>
           <p className="text-sm text-muted-foreground">
             Restaurant POS · next bill {formatBillNumber(menu.nextBillNumber)} ·{" "}
