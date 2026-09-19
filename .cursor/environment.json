@@ -1,0 +1,8 @@
+{
+  "ports": [
+    {
+      "name": "Spice Counter POS",
+      "port": 43123
+    }
+  ]
+}
