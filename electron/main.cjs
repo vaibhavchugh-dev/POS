@@ -34,6 +34,10 @@ function waitForHttp(url, timeoutMs = 60000) {
   });
 }
 
+function hasProductionBuild() {
+  return fs.existsSync(path.join(ROOT, ".next", "BUILD_ID"));
+}
+
 function nextCommand() {
   const bin = path.join(
     ROOT,
@@ -41,9 +45,9 @@ function nextCommand() {
     ".bin",
     process.platform === "win32" ? "next.cmd" : "next",
   );
-  const built = fs.existsSync(path.join(ROOT, ".next"));
+  const useProd = hasProductionBuild() && process.env.POS_DEV !== "1";
   const args = [
-    built && !process.env.POS_DEV ? "start" : "dev",
+    useProd ? "start" : "dev",
     "--hostname",
     HOST,
     "--port",
@@ -77,7 +81,6 @@ function createWindow() {
     title: "Jain Dosa House POS",
     backgroundColor: "#f4ead8",
     autoHideMenuBar: true,
-    backgroundColor: "#fafafa",
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

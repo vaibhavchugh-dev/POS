@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start --hostname 127.0.0.1 --port 43123",
     "lint": "eslint",
-    "desktop": "electron ."
+    "desktop": "electron .",
+    "desktop:prod": "next build && electron ."
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
