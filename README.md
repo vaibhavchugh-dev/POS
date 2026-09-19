@@ -5,12 +5,12 @@ Local restaurant till for **your PC**. Not a cloud app.
 ## Put it on your computer
 
 1. Install [Node.js 20 LTS](https://nodejs.org/).
-2. Click **Create repo** in this Cursor project (if you do not have a Git URL yet).
+2. This project’s GitHub repo: https://github.com/vaibhavchugh-dev/POS
 3. On **your** Windows PC:
 
 ```bat
-git clone <YOUR-REPO-URL>
-cd spice-counter-pos
+git clone https://github.com/vaibhavchugh-dev/POS.git
+cd POS
 npm install
 npm run desktop
 ```
@@ -22,7 +22,6 @@ A window **Spice Counter POS** opens on that machine. Bills are saved locally (`
 See `LOCAL-SETUP.txt` for the short version.
 
 ## SQL Server (same PC or shop LAN)
-
 
 On the same PC or a shop server, create database `RestaurantPos`. Copy `.env.example` to `.env` and set:
 
