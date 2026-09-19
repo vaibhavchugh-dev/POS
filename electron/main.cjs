@@ -75,6 +75,7 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     title: "Jain Dosa House POS",
+    backgroundColor: "#f4ead8",
     autoHideMenuBar: true,
     backgroundColor: "#fafafa",
     webPreferences: {

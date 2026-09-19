@@ -161,7 +161,7 @@ export async function listMenu(): Promise<{
         price: Number(r.Price),
         available: Boolean(r.Available),
       })),
-      taxRate: Number(process.env.TAX_RATE ?? 0.1),
+      taxRate: Number(process.env.TAX_RATE ?? 0.05),
       nextBillNumber: Number(counter.recordset[0]?.NextValue ?? 1),
       backend: "sqlserver",
     };
@@ -272,7 +272,7 @@ export async function createBill(input: {
   if (sqlConfigured()) {
     const pool = await getPool();
     await ensureSqlSchema(pool);
-    const taxRate = Number(process.env.TAX_RATE ?? 0.1);
+    const taxRate = Number(process.env.TAX_RATE ?? 0.05);
     const menu = await pool.request().query("SELECT * FROM dbo.MenuItems");
     const items = new Map(
       menu.recordset.map((r) => [

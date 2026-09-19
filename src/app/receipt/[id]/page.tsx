@@ -20,7 +20,7 @@ export default async function ReceiptPage({
       <h1 className="text-lg font-bold">{RESTAURANT_NAME}</h1>
       <p>{formatBillNumber(bill.billNumber)}</p>
       <p>{bill.tableLabel}</p>
-      <p>{new Date(bill.createdAt).toLocaleString()}</p>
+      <p>{new Date(bill.createdAt).toLocaleString("en-IN")}</p>
       <hr className="my-3 border-dashed" />
       {bill.lines.map((line) => (
         <div key={line.menuItemId} className="flex justify-between">
@@ -36,7 +36,7 @@ export default async function ReceiptPage({
         <span>{formatMoney(bill.subtotal)}</span>
       </div>
       <div className="flex justify-between">
-        <span>Tax {(bill.taxRate * 100).toFixed(0)}%</span>
+        <span>GST {(bill.taxRate * 100).toFixed(0)}%</span>
         <span>{formatMoney(bill.taxAmount)}</span>
       </div>
       <div className="flex justify-between font-bold">

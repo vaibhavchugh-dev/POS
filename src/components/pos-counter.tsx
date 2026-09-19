@@ -20,10 +20,12 @@ type MenuData = {
   backend: string;
 };
 
-const btn =
-  "inline-flex h-8 shrink-0 items-center justify-center rounded-lg border px-2.5 text-sm font-medium";
-const btnPrimary = `${btn} border-transparent bg-primary text-primary-foreground`;
-const btnOutline = `${btn} border-border bg-background`;
+const chip =
+  "inline-flex h-9 shrink-0 items-center justify-center rounded-full border px-3.5 text-sm font-semibold tracking-wide";
+const chipOn = `${chip} border-transparent bg-primary text-primary-foreground shadow-sm`;
+const chipOff = `${chip} border-[#e2d3b8] bg-[#fffaf2] text-[#5c4024] hover:bg-[#f3e4c8]`;
+const qtyBtn =
+  "inline-flex size-8 items-center justify-center rounded-full border border-[#e2d3b8] bg-[#fffaf2] text-base font-semibold text-[#5c4024]";
 
 export function PosCounter({
   menu,
@@ -49,51 +51,53 @@ export function PosCounter({
   );
   const taxAmount = subtotal * menu.taxRate;
   const total = subtotal + taxAmount;
+  const gstPct = Math.round(menu.taxRate * 100);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
+    <div className="flex min-h-screen flex-col bg-[radial-gradient(1200px_600px_at_10%_-10%,#fbe7c6_0%,transparent_55%),linear-gradient(180deg,#f7efdf_0%,#f3e6cf_100%)]">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e4d2b0] bg-[#3f2414] px-5 py-4 text-[#f8ead3]">
         <div>
-          <h1 className="font-heading text-xl font-semibold tracking-tight">
+          <p className="text-[11px] font-semibold tracking-[0.22em] text-[#e8b86a] uppercase">
+            Counter billing
+          </p>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">
             {RESTAURANT_NAME}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Restaurant POS · next bill {formatBillNumber(menu.nextBillNumber)} ·{" "}
-            {menu.backend === "sqlserver"
-              ? "SQL Server"
-              : "Local file (SQL Server not configured)"}
+          <p className="mt-1 text-sm text-[#e8d7bc]">
+            Next {formatBillNumber(menu.nextBillNumber)} · Prices in ₹ ·{" "}
+            {menu.backend === "sqlserver" ? "SQL Server" : "Saved on this PC"}
           </p>
         </div>
         <div className="flex gap-2">
-          <a className={btnOutline} href="/?dialog=menu">
-            Menu items
+          <a className="inline-flex h-9 items-center rounded-full border border-[#c9a36a] px-3.5 text-sm font-medium text-[#f8ead3] hover:bg-white/10" href="/?dialog=menu">
+            Menu
           </a>
-          <a className={btnOutline} href="/?dialog=bills">
+          <a className="inline-flex h-9 items-center rounded-full bg-[#e8b86a] px-3.5 text-sm font-semibold text-[#3f2414]" href="/?dialog=bills">
             Today&apos;s bills
           </a>
         </div>
       </header>
 
-      <div className="grid flex-1 grid-cols-1 lg:grid-cols-[1fr_380px]">
-        <section className="flex min-h-0 flex-col border-b lg:border-b-0 lg:border-r">
-          <nav className="flex gap-2 overflow-x-auto px-4 py-3">
-            <a className={categoryId === "all" ? btnPrimary : btnOutline} href="/">
+      <div className="grid flex-1 grid-cols-1 lg:grid-cols-[1fr_400px]">
+        <section className="flex min-h-0 flex-col">
+          <nav className="flex gap-2 overflow-x-auto px-5 py-4">
+            <a className={categoryId === "all" ? chipOn : chipOff} href="/">
               All
             </a>
             {menu.categories.map((cat) => (
               <a
                 key={cat.id}
                 href={`/?category=${cat.id}`}
-                className={categoryId === cat.id ? btnPrimary : btnOutline}
+                className={categoryId === cat.id ? chipOn : chipOff}
               >
                 {cat.name}
               </a>
             ))}
           </nav>
-          <div className="h-[calc(100vh-11rem)] overflow-y-auto px-4 pb-4">
+          <div className="h-[calc(100vh-12rem)] overflow-y-auto px-5 pb-5">
             {visibleItems.length === 0 ? (
-              <p className="py-12 text-center text-muted-foreground">
-                No items in this category. Add some from Menu items.
+              <p className="py-12 text-center text-[#7a5a3a]">
+                No items in this category. Add some from Menu.
               </p>
             ) : (
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
@@ -105,10 +109,14 @@ export function PosCounter({
                     <button
                       type="submit"
                       disabled={!item.available}
-                      className="w-full rounded-xl border bg-card p-4 text-left shadow-sm hover:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+                      className="w-full rounded-2xl border border-[#ead9b8] bg-[#fffaf2] p-4 text-left shadow-[0_8px_20px_-12px_rgba(92,64,36,0.35)] transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <div className="mb-2 font-medium leading-snug">{item.name}</div>
-                      <span className="text-lg font-semibold">{formatMoney(item.price)}</span>
+                      <div className="mb-3 min-h-10 font-medium leading-snug text-[#3f2414]">
+                        {item.name}
+                      </div>
+                      <span className="text-lg font-semibold text-primary">
+                        {formatMoney(item.price)}
+                      </span>
                     </button>
                   </form>
                 ))}
@@ -117,9 +125,9 @@ export function PosCounter({
           </div>
         </section>
 
-        <aside className="flex flex-col p-4">
-          <form action={setTableAction} className="mb-3">
-            <label className="mb-1 block text-sm font-medium" htmlFor="table">
+        <aside className="m-4 flex flex-col rounded-2xl border border-[#e4d2b0] bg-[#fffaf2] p-4 shadow-[0_16px_40px_-24px_rgba(63,36,20,0.45)] lg:m-4 lg:ml-0">
+          <form action={setTableAction} className="mb-4">
+            <label className="mb-1 block text-xs font-semibold tracking-wide text-[#7a5a3a] uppercase" htmlFor="table">
               Table / guest
             </label>
             <div className="flex gap-2">
@@ -128,45 +136,45 @@ export function PosCounter({
                 name="tableLabel"
                 defaultValue={ticket.tableLabel}
                 placeholder="Table 4 or Walk-in"
-                className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm"
+                className="h-10 w-full rounded-xl border border-[#e2d3b8] bg-white px-3 text-sm"
               />
-              <button type="submit" className={btnOutline}>
+              <button type="submit" className={chipOff}>
                 Save
               </button>
             </div>
           </form>
-          <h2 className="mb-2 font-heading text-lg font-semibold">Current ticket</h2>
-          <div className="min-h-40 flex-1 overflow-y-auto rounded-lg border">
+          <h2 className="mb-2 font-heading text-lg font-semibold text-[#3f2414]">KOT / ticket</h2>
+          <div className="min-h-40 flex-1 overflow-y-auto rounded-xl border border-[#ead9b8] bg-[#fffdf8]">
             {ticket.lines.length === 0 ? (
-              <p className="p-6 text-center text-sm text-muted-foreground">
-                Tap a menu item to start a bill.
+              <p className="p-6 text-center text-sm text-[#7a5a3a]">
+                Tap a dosa or drink to start a bill.
               </p>
             ) : (
-              <ul className="divide-y">
+              <ul className="divide-y divide-[#ead9b8]">
                 {ticket.lines.map((line) => (
-                  <li key={line.menuItemId} className="flex items-center gap-2 px-3 py-2">
+                  <li key={line.menuItemId} className="flex items-center gap-2 px-3 py-2.5">
                     <div className="min-w-0 flex-1">
-                      <div className="truncate font-medium">{line.name}</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="truncate font-medium text-[#3f2414]">{line.name}</div>
+                      <div className="text-xs text-[#7a5a3a]">
                         {formatMoney(line.unitPrice)} each
                       </div>
                     </div>
                     <form action={changeQtyAction}>
                       <input type="hidden" name="menuItemId" value={line.menuItemId} />
                       <input type="hidden" name="delta" value="-1" />
-                      <button type="submit" className={btnOutline}>
+                      <button type="submit" className={qtyBtn}>
                         −
                       </button>
                     </form>
-                    <span className="w-6 text-center text-sm">{line.quantity}</span>
+                    <span className="w-6 text-center text-sm font-semibold">{line.quantity}</span>
                     <form action={changeQtyAction}>
                       <input type="hidden" name="menuItemId" value={line.menuItemId} />
                       <input type="hidden" name="delta" value="1" />
-                      <button type="submit" className={btnOutline}>
+                      <button type="submit" className={qtyBtn}>
                         +
                       </button>
                     </form>
-                    <div className="w-16 text-right text-sm font-medium">
+                    <div className="w-24 text-right text-sm font-semibold text-[#3f2414]">
                       {formatMoney(line.unitPrice * line.quantity)}
                     </div>
                   </li>
@@ -174,34 +182,33 @@ export function PosCounter({
               </ul>
             )}
           </div>
-          <hr className="my-3 border-border" />
-          <dl className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <dt>Subtotal</dt>
-              <dd>{formatMoney(subtotal)}</dd>
+          <div className="mt-3 space-y-1 text-sm">
+            <div className="flex justify-between text-[#5c4024]">
+              <span>Subtotal</span>
+              <span>{formatMoney(subtotal)}</span>
             </div>
-            <div className="flex justify-between text-muted-foreground">
-              <dt>Tax {(menu.taxRate * 100).toFixed(0)}%</dt>
-              <dd>{formatMoney(taxAmount)}</dd>
+            <div className="flex justify-between text-[#7a5a3a]">
+              <span>GST {gstPct}%</span>
+              <span>{formatMoney(taxAmount)}</span>
             </div>
-            <div className="flex justify-between text-lg font-semibold">
-              <dt>Total</dt>
-              <dd>{formatMoney(total)}</dd>
+            <div className="flex justify-between border-t border-[#ead9b8] pt-2 text-xl font-semibold text-[#3f2414]">
+              <span>Total</span>
+              <span>{formatMoney(total)}</span>
             </div>
-          </dl>
-          <div className="mt-3 flex gap-2">
+          </div>
+          <div className="mt-4 flex gap-2">
             <form action={clearTicketAction} className="flex-1">
               <button
-                className={`${btnOutline} w-full`}
+                className={`${chipOff} h-11 w-full rounded-xl`}
                 type="submit"
                 disabled={!ticket.lines.length}
               >
                 Clear
               </button>
             </form>
-            <form action={generateBillAction} className="flex-1">
+            <form action={generateBillAction} className="flex-[1.4]">
               <button
-                className={`${btnPrimary} w-full`}
+                className="h-11 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm disabled:opacity-50"
                 type="submit"
                 disabled={!ticket.lines.length}
               >
@@ -214,8 +221,8 @@ export function PosCounter({
 
       {dialog === "receipt" && receipt ? (
         <Overlay title={formatBillNumber(receipt.billNumber)}>
-          <p className="text-sm">
-            {receipt.tableLabel} · {new Date(receipt.createdAt).toLocaleString()}
+          <p className="text-sm text-[#7a5a3a]">
+            {receipt.tableLabel} · {new Date(receipt.createdAt).toLocaleString("en-IN")}
           </p>
           {receipt.lines.map((line) => (
             <div key={line.menuItemId} className="flex justify-between text-sm">
@@ -225,35 +232,33 @@ export function PosCounter({
               <span>{formatMoney(line.lineTotal)}</span>
             </div>
           ))}
-          <hr className="border-border" />
-          <div className="flex justify-between font-semibold">
+          <hr className="border-[#ead9b8]" />
+          <div className="flex justify-between text-lg font-semibold">
             <span>Total</span>
             <span>{formatMoney(receipt.total)}</span>
           </div>
-          <a className={btnPrimary} href={`/receipt/${receipt.id}`} target="_blank" rel="noreferrer">
+          <a className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground" href={`/receipt/${receipt.id}`} target="_blank" rel="noreferrer">
             Print receipt
           </a>
         </Overlay>
       ) : null}
 
       {dialog === "bills" ? (
-        <Overlay title="Bills">
+        <Overlay title="Today's bills">
           {bills.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No bills yet. Generate one from the counter.
-            </p>
+            <p className="text-sm text-[#7a5a3a]">No bills yet. Generate one from the counter.</p>
           ) : (
             <ul className="space-y-3">
               {bills.map((bill) => (
-                <li key={bill.id} className="rounded-lg border p-3 text-sm">
+                <li key={bill.id} className="rounded-xl border border-[#ead9b8] bg-[#fffdf8] p-3 text-sm">
                   <div className="mb-1 flex items-center justify-between">
-                    <span className="font-medium">{formatBillNumber(bill.billNumber)}</span>
-                    <span>{formatMoney(bill.total)}</span>
+                    <span className="font-semibold">{formatBillNumber(bill.billNumber)}</span>
+                    <span className="font-semibold text-primary">{formatMoney(bill.total)}</span>
                   </div>
-                  <p className="text-muted-foreground">
-                    {bill.tableLabel} · {new Date(bill.createdAt).toLocaleString()}
+                  <p className="text-[#7a5a3a]">
+                    {bill.tableLabel} · {new Date(bill.createdAt).toLocaleString("en-IN")}
                   </p>
-                  <a className={`${btnOutline} mt-2`} href={`/receipt/${bill.id}`} target="_blank" rel="noreferrer">
+                  <a className={`${chipOff} mt-2`} href={`/receipt/${bill.id}`} target="_blank" rel="noreferrer">
                     Print
                   </a>
                 </li>
@@ -270,12 +275,12 @@ export function PosCounter({
               name="name"
               required
               placeholder="Item name"
-              className="h-8 rounded-lg border border-input px-2.5 text-sm"
+              className="h-10 rounded-xl border border-[#e2d3b8] px-3 text-sm"
             />
             <div className="grid grid-cols-2 gap-2">
               <select
                 name="categoryId"
-                className="h-8 rounded-lg border bg-background px-2 text-sm"
+                className="h-10 rounded-xl border border-[#e2d3b8] bg-white px-2 text-sm"
                 defaultValue={menu.categories[0]?.id}
               >
                 {menu.categories.map((cat) => (
@@ -288,21 +293,21 @@ export function PosCounter({
                 name="price"
                 type="number"
                 min="0"
-                step="0.01"
-                placeholder="Price"
+                step="1"
+                placeholder="Price ₹"
                 required
-                className="h-8 rounded-lg border border-input px-2.5 text-sm"
+                className="h-10 rounded-xl border border-[#e2d3b8] px-3 text-sm"
               />
             </div>
-            <button type="submit" className={btnPrimary}>
+            <button type="submit" className="h-10 rounded-xl bg-primary text-sm font-semibold text-primary-foreground">
               Add item
             </button>
           </form>
           <ul className="space-y-2">
             {menu.menuItems.map((item) => (
-              <li key={item.id} className="rounded-md border px-3 py-2 text-sm">
+              <li key={item.id} className="rounded-xl border border-[#ead9b8] bg-[#fffdf8] px-3 py-2 text-sm">
                 <div className="font-medium">{item.name}</div>
-                <div className="text-muted-foreground">{formatMoney(item.price)}</div>
+                <div className="text-primary">{formatMoney(item.price)}</div>
               </li>
             ))}
           </ul>
@@ -314,11 +319,11 @@ export function PosCounter({
 
 function Overlay({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
-      <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-xl border bg-background p-4 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#3f2414]/45 p-4 sm:items-center">
+      <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#ead9b8] bg-[#fffaf2] p-5 shadow-2xl">
         <div className="mb-3 flex items-center justify-between gap-2">
-          <h2 className="font-heading text-lg font-semibold">{title}</h2>
-          <a href="/" className="text-sm text-muted-foreground underline">
+          <h2 className="font-heading text-lg font-semibold text-[#3f2414]">{title}</h2>
+          <a href="/" className="text-sm font-medium text-primary underline">
             Close
           </a>
         </div>
