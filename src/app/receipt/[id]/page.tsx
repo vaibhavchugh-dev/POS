@@ -1,4 +1,5 @@
 import { RESTAURANT_NAME } from "@/lib/brand";
+import { billChargeLines } from "@/lib/charges-display";
 import { listBills } from "@/lib/db";
 import { formatBillNumber, formatMoney } from "@/lib/seed";
 import { notFound } from "next/navigation";
@@ -31,14 +32,12 @@ export default async function ReceiptPage({
         </div>
       ))}
       <hr className="my-3 border-dashed" />
-      <div className="flex justify-between">
-        <span>Subtotal</span>
-        <span>{formatMoney(bill.subtotal)}</span>
-      </div>
-      <div className="flex justify-between">
-        <span>GST {(bill.taxRate * 100).toFixed(0)}%</span>
-        <span>{formatMoney(bill.taxAmount)}</span>
-      </div>
+      {billChargeLines(bill).map((row) => (
+        <div key={row.label} className="flex justify-between">
+          <span>{row.label}</span>
+          <span>{formatMoney(row.amount)}</span>
+        </div>
+      ))}
       <div className="flex justify-between font-bold">
         <span>Total</span>
         <span>{formatMoney(bill.total)}</span>

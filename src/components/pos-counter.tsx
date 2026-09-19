@@ -8,6 +8,7 @@ import {
   type TicketState,
 } from "@/app/actions";
 import { RESTAURANT_NAME } from "@/lib/brand";
+import { billChargeLines } from "@/lib/charges-display";
 import { paymentLabel } from "@/lib/sales";
 import { formatBillNumber, formatMoney } from "@/lib/seed";
 import { billWhatsAppText, whatsappHref } from "@/lib/whatsapp";
@@ -51,8 +52,6 @@ export function PosCounter({
     (sum, line) => sum + line.unitPrice * line.quantity,
     0,
   );
-  const taxAmount = subtotal * menu.taxRate;
-  const total = subtotal + taxAmount;
   const gstPct = Math.round(menu.taxRate * 100);
 
   return (
@@ -189,17 +188,10 @@ export function PosCounter({
           </div>
           <div className="mt-3 space-y-1 text-sm">
             <div className="flex justify-between text-[#5c4024]">
-              <span>Subtotal</span>
+              <span>Items</span>
               <span>{formatMoney(subtotal)}</span>
             </div>
-            <div className="flex justify-between text-[#7a5a3a]">
-              <span>GST {gstPct}%</span>
-              <span>{formatMoney(taxAmount)}</span>
-            </div>
-            <div className="flex justify-between border-t border-[#ead9b8] pt-2 text-xl font-semibold text-[#3f2414]">
-              <span>Total</span>
-              <span>{formatMoney(total)}</span>
-            </div>
+            <p className="text-xs text-[#7a5a3a]">GST, discount and service charge are optional below.</p>
           </div>
           <div className="mt-4 space-y-2">
             <form action={clearTicketAction}>
@@ -212,6 +204,52 @@ export function PosCounter({
               </button>
             </form>
             <form action={generateBillAction} className="space-y-2">
+              <div className="rounded-xl border border-[#ead9b8] bg-white p-3 space-y-2 text-sm">
+                <label className="flex items-center gap-2 font-medium">
+                  <input type="checkbox" name="applyDiscount" />
+                  Discount
+                </label>
+                <div className="flex gap-2">
+                  <select name="discountKind" className="h-9 rounded-lg border border-[#e2d3b8] px-2">
+                    <option value="percent">%</option>
+                    <option value="amount">₹</option>
+                  </select>
+                  <input
+                    name="discountValue"
+                    type="number"
+                    min="0"
+                    step="1"
+                    defaultValue="0"
+                    className="h-9 w-full rounded-lg border border-[#e2d3b8] px-2"
+                  />
+                </div>
+                <label className="flex items-center gap-2 font-medium">
+                  <input type="checkbox" name="applyGst" defaultChecked />
+                  GST
+                  <input
+                    name="gstPercent"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    defaultValue={gstPct}
+                    className="ml-auto h-9 w-16 rounded-lg border border-[#e2d3b8] px-2"
+                  />
+                  <span>%</span>
+                </label>
+                <label className="flex items-center gap-2 font-medium">
+                  <input type="checkbox" name="applyService" />
+                  Service charge
+                  <input
+                    name="servicePercent"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    defaultValue="10"
+                    className="ml-auto h-9 w-16 rounded-lg border border-[#e2d3b8] px-2"
+                  />
+                  <span>%</span>
+                </label>
+              </div>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <label className="flex items-center gap-2 rounded-xl border border-[#ead9b8] bg-white px-3 py-2">
                   <input type="radio" name="paymentMode" value="cash" defaultChecked />
@@ -255,6 +293,12 @@ export function PosCounter({
             </div>
           ))}
           <hr className="border-[#ead9b8]" />
+          {billChargeLines(receipt).map((row) => (
+            <div key={row.label} className="flex justify-between text-sm">
+              <span>{row.label}</span>
+              <span>{formatMoney(row.amount)}</span>
+            </div>
+          ))}
           <div className="flex justify-between text-lg font-semibold">
             <span>Total</span>
             <span>{formatMoney(receipt.total)}</span>

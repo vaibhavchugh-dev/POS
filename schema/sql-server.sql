@@ -31,7 +31,11 @@ CREATE TABLE dbo.Bills (
   TaxAmount DECIMAL(10,2) NOT NULL,
   Total DECIMAL(10,2) NOT NULL,
   PaymentMode NVARCHAR(12) NOT NULL DEFAULT 'cash',
-  GuestPhone NVARCHAR(20) NOT NULL DEFAULT ''
+  GuestPhone NVARCHAR(20) NOT NULL DEFAULT '',
+  DiscountAmount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  DiscountPercent DECIMAL(6,4) NOT NULL DEFAULT 0,
+  ServiceChargeAmount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  ServiceChargeRate DECIMAL(6,4) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE dbo.BillLines (

@@ -43,7 +43,7 @@ With no SQL Server settings, menu and bills are stored in `data/pos-store.json` 
 ## Counter features
 
 - Menu by category; add items from Menu
-- Ticket with Cash or UPI, GST 5%, sequential bills
+- Optional discount (₹ or %), GST, and service charge per bill
 - Today's sales dashboard (cash vs UPI)
 - Print receipt or send bill / day total on WhatsApp
 

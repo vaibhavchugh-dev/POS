@@ -2,6 +2,7 @@ import { RESTAURANT_NAME } from "./brand";
 import { formatBillNumber, formatMoney } from "./seed";
 import type { Bill } from "./types";
 import type { DaySales } from "./sales";
+import { billChargeLines } from "./charges-display";
 
 function digits(phone: string) {
   const d = phone.replace(/\D/g, "");
@@ -28,7 +29,7 @@ ${pay}
 
 ${lines}
 
-GST ${formatMoney(bill.taxAmount)}
+${billChargeLines(bill).map((row) => `${row.label} ${formatMoney(row.amount)}`).join("\n")}
 Total ${formatMoney(bill.total)}
 
 Thank you. Visit again.`;

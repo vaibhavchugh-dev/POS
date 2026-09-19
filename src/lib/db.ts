@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import sql from "mssql";
+import { tallyCharges, type ChargeInput } from "./billing";
 import { seedStore } from "./seed";
 import type { Bill, BillLine, Category, MenuItem, PaymentMode, PosStore } from "./types";
 
@@ -62,7 +63,11 @@ async function ensureSqlSchema(pool: sql.ConnectionPool) {
         TaxAmount DECIMAL(10,2) NOT NULL,
         Total DECIMAL(10,2) NOT NULL,
         PaymentMode NVARCHAR(12) NOT NULL DEFAULT 'cash',
-        GuestPhone NVARCHAR(20) NOT NULL DEFAULT ''
+        GuestPhone NVARCHAR(20) NOT NULL DEFAULT '',
+        DiscountAmount DECIMAL(10,2) NOT NULL DEFAULT 0,
+        DiscountPercent DECIMAL(6,4) NOT NULL DEFAULT 0,
+        ServiceChargeAmount DECIMAL(10,2) NOT NULL DEFAULT 0,
+        ServiceChargeRate DECIMAL(6,4) NOT NULL DEFAULT 0
       );
 
     IF OBJECT_ID('dbo.BillLines', 'U') IS NULL
@@ -91,6 +96,18 @@ async function ensureSqlSchema(pool: sql.ConnectionPool) {
 
     IF COL_LENGTH('dbo.Bills', 'GuestPhone') IS NULL
       ALTER TABLE dbo.Bills ADD GuestPhone NVARCHAR(20) NOT NULL CONSTRAINT DF_Bills_GuestPhone DEFAULT '';
+
+    IF COL_LENGTH('dbo.Bills', 'DiscountAmount') IS NULL
+      ALTER TABLE dbo.Bills ADD DiscountAmount DECIMAL(10,2) NOT NULL CONSTRAINT DF_Bills_Discount DEFAULT 0;
+
+    IF COL_LENGTH('dbo.Bills', 'DiscountPercent') IS NULL
+      ALTER TABLE dbo.Bills ADD DiscountPercent DECIMAL(6,4) NOT NULL CONSTRAINT DF_Bills_DiscPct DEFAULT 0;
+
+    IF COL_LENGTH('dbo.Bills', 'ServiceChargeAmount') IS NULL
+      ALTER TABLE dbo.Bills ADD ServiceChargeAmount DECIMAL(10,2) NOT NULL CONSTRAINT DF_Bills_SCAmt DEFAULT 0;
+
+    IF COL_LENGTH('dbo.Bills', 'ServiceChargeRate') IS NULL
+      ALTER TABLE dbo.Bills ADD ServiceChargeRate DECIMAL(6,4) NOT NULL CONSTRAINT DF_Bills_SCRate DEFAULT 0;
   `);
 
   const count = await pool.request().query("SELECT COUNT(*) AS c FROM dbo.Categories");
@@ -263,6 +280,10 @@ export async function listBills(): Promise<Bill[]> {
       total: Number(r.Total),
       paymentMode: (r.PaymentMode === "upi" ? "upi" : "cash") as PaymentMode,
       guestPhone: String(r.GuestPhone ?? ""),
+      discountAmount: Number(r.DiscountAmount ?? 0),
+      discountPercent: Number(r.DiscountPercent ?? 0),
+      serviceChargeAmount: Number(r.ServiceChargeAmount ?? 0),
+      serviceChargeRate: Number(r.ServiceChargeRate ?? 0),
       lines: byBill.get(r.Id) ?? [],
     }));
   }
@@ -273,6 +294,10 @@ export async function listBills(): Promise<Bill[]> {
       ...bill,
       paymentMode: (bill.paymentMode === "upi" ? "upi" : "cash") as PaymentMode,
       guestPhone: bill.guestPhone ?? "",
+      discountAmount: bill.discountAmount ?? 0,
+      discountPercent: bill.discountPercent ?? 0,
+      serviceChargeAmount: bill.serviceChargeAmount ?? 0,
+      serviceChargeRate: bill.serviceChargeRate ?? 0,
     }))
     .sort((a, b) => b.billNumber - a.billNumber);
 }
@@ -282,6 +307,7 @@ export async function createBill(input: {
   paymentMode?: PaymentMode;
   guestPhone?: string;
   lines: { menuItemId: string; quantity: number }[];
+  charges?: Omit<ChargeInput, "subtotal">;
 }): Promise<Bill> {
   if (!input.lines.length) {
     throw new Error("Add at least one item before generating a bill.");
@@ -290,7 +316,6 @@ export async function createBill(input: {
   if (sqlConfigured()) {
     const pool = await getPool();
     await ensureSqlSchema(pool);
-    const taxRate = Number(process.env.TAX_RATE ?? 0.05);
     const menu = await pool.request().query("SELECT * FROM dbo.MenuItems");
     const items = new Map(
       menu.recordset.map((r) => [
@@ -315,8 +340,12 @@ export async function createBill(input: {
     const subtotal = Number(
       billLines.reduce((sum, l) => sum + l.lineTotal, 0).toFixed(2),
     );
-    const taxAmount = Number((subtotal * taxRate).toFixed(2));
-    const total = Number((subtotal + taxAmount).toFixed(2));
+    const charges = tallyCharges({
+      subtotal,
+      ...input.charges,
+      applyGst: input.charges?.applyGst ?? true,
+      gstRate: input.charges?.gstRate ?? Number(process.env.TAX_RATE ?? 0.05),
+    });
     const paymentMode: PaymentMode = input.paymentMode === "upi" ? "upi" : "cash";
     const guestPhone = String(input.guestPhone ?? "").trim();
 
@@ -338,15 +367,19 @@ export async function createBill(input: {
         .input("num", sql.Int, billNumber)
         .input("table", sql.NVarChar, input.tableLabel.trim() || "Walk-in")
         .input("created", sql.DateTime2, createdAt)
-        .input("sub", sql.Decimal(10, 2), subtotal)
-        .input("taxRate", sql.Decimal(6, 4), taxRate)
-        .input("taxAmt", sql.Decimal(10, 2), taxAmount)
-        .input("total", sql.Decimal(10, 2), total)
+        .input("sub", sql.Decimal(10, 2), charges.subtotal)
+        .input("taxRate", sql.Decimal(6, 4), charges.taxRate)
+        .input("taxAmt", sql.Decimal(10, 2), charges.taxAmount)
+        .input("total", sql.Decimal(10, 2), charges.total)
         .input("pay", sql.NVarChar, paymentMode)
         .input("phone", sql.NVarChar, guestPhone)
+        .input("discAmt", sql.Decimal(10, 2), charges.discountAmount)
+        .input("discPct", sql.Decimal(6, 4), charges.discountPercent)
+        .input("scAmt", sql.Decimal(10, 2), charges.serviceChargeAmount)
+        .input("scRate", sql.Decimal(6, 4), charges.serviceChargeRate)
         .query(`
-          INSERT INTO dbo.Bills (Id, BillNumber, TableLabel, CreatedAt, Subtotal, TaxRate, TaxAmount, Total, PaymentMode, GuestPhone)
-          VALUES (@id, @num, @table, @created, @sub, @taxRate, @taxAmt, @total, @pay, @phone)
+          INSERT INTO dbo.Bills (Id, BillNumber, TableLabel, CreatedAt, Subtotal, TaxRate, TaxAmount, Total, PaymentMode, GuestPhone, DiscountAmount, DiscountPercent, ServiceChargeAmount, ServiceChargeRate)
+          VALUES (@id, @num, @table, @created, @sub, @taxRate, @taxAmt, @total, @pay, @phone, @discAmt, @discPct, @scAmt, @scRate)
         `);
 
       for (const line of billLines) {
@@ -369,12 +402,16 @@ export async function createBill(input: {
         billNumber,
         tableLabel: input.tableLabel.trim() || "Walk-in",
         createdAt: createdAt.toISOString(),
-        subtotal,
-        taxRate,
-        taxAmount,
-        total,
+        subtotal: charges.subtotal,
+        taxRate: charges.taxRate,
+        taxAmount: charges.taxAmount,
+        total: charges.total,
         paymentMode,
         guestPhone,
+        discountAmount: charges.discountAmount,
+        discountPercent: charges.discountPercent,
+        serviceChargeAmount: charges.serviceChargeAmount,
+        serviceChargeRate: charges.serviceChargeRate,
         lines: billLines,
       };
     } catch (error) {
@@ -400,8 +437,12 @@ export async function createBill(input: {
   const subtotal = Number(
     billLines.reduce((sum, l) => sum + l.lineTotal, 0).toFixed(2),
   );
-  const taxAmount = Number((subtotal * store.taxRate).toFixed(2));
-  const total = Number((subtotal + taxAmount).toFixed(2));
+  const charges = tallyCharges({
+    subtotal,
+    ...input.charges,
+    applyGst: input.charges?.applyGst ?? true,
+    gstRate: input.charges?.gstRate ?? store.taxRate,
+  });
   const paymentMode: PaymentMode = input.paymentMode === "upi" ? "upi" : "cash";
   const guestPhone = String(input.guestPhone ?? "").trim();
   const bill: Bill = {
@@ -409,12 +450,16 @@ export async function createBill(input: {
     billNumber: store.nextBillNumber,
     tableLabel: input.tableLabel.trim() || "Walk-in",
     createdAt: new Date().toISOString(),
-    subtotal,
-    taxRate: store.taxRate,
-    taxAmount,
-    total,
+    subtotal: charges.subtotal,
+    taxRate: charges.taxRate,
+    taxAmount: charges.taxAmount,
+    total: charges.total,
     paymentMode,
     guestPhone,
+    discountAmount: charges.discountAmount,
+    discountPercent: charges.discountPercent,
+    serviceChargeAmount: charges.serviceChargeAmount,
+    serviceChargeRate: charges.serviceChargeRate,
     lines: billLines,
   };
   store.bills.push(bill);

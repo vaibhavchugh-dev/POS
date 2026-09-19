@@ -18,6 +18,7 @@ export async function POST(request: Request) {
       tableLabel: String(body.tableLabel ?? ""),
       paymentMode: body.paymentMode === "upi" ? "upi" : "cash",
       guestPhone: String(body.guestPhone ?? ""),
+      charges: body.charges,
       lines: Array.isArray(body.lines) ? body.lines : [],
     });
     return NextResponse.json(bill, { status: 201 });

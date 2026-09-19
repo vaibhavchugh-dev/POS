@@ -84,10 +84,20 @@ export async function generateBillAction(formData: FormData) {
   }
   const paymentMode = String(formData.get("paymentMode") ?? "cash") === "upi" ? "upi" : "cash";
   const guestPhone = String(formData.get("guestPhone") ?? "");
+  const applyDiscount = formData.get("applyDiscount") === "on";
+  const discountKind = String(formData.get("discountKind") ?? "percent") === "amount" ? "amount" : "percent";
   const bill = await createBill({
     tableLabel: ticket.tableLabel,
     paymentMode,
     guestPhone,
+    charges: {
+      discountKind: applyDiscount ? discountKind : "none",
+      discountValue: Number(formData.get("discountValue") ?? 0),
+      applyGst: formData.get("applyGst") === "on",
+      gstRate: Number(formData.get("gstPercent") ?? 5) / 100,
+      applyService: formData.get("applyService") === "on",
+      serviceRate: Number(formData.get("servicePercent") ?? 10) / 100,
+    },
     lines: ticket.lines.map((line) => ({
       menuItemId: line.menuItemId,
       quantity: line.quantity,

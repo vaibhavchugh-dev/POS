@@ -33,6 +33,10 @@ export type Bill = {
   total: number;
   paymentMode: PaymentMode;
   guestPhone: string;
+  discountAmount: number;
+  discountPercent: number;
+  serviceChargeAmount: number;
+  serviceChargeRate: number;
   lines: BillLine[];
 };
 
